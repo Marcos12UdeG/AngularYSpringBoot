@@ -7,5 +7,10 @@ import org.springframework.http.ResponseEntity;
 public interface CategoryServices {
 
     public ResponseEntity<CategoryResponseRest> Search();
+    public ResponseEntity<CategoryResponseRest> SearchById(Long id);
+
+    public ResponseEntity<CategoryResponseRest> Agregar(Category category);
+
+    public ResponseEntity<CategoryResponseRest> Eliminar(Long id);
 
 }
