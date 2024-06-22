@@ -37,10 +37,17 @@ public class CategoryController {
         return response;
     }
 
+    @PutMapping("/actualizar/{id}")
+    private ResponseEntity<CategoryResponseRest> Update(@RequestBody Category category,@PathVariable Long id)
+    {
+        ResponseEntity<CategoryResponseRest> response = categoryServicesIMPL.Update(category,id);
+        return response;
+    }
+
     @DeleteMapping("/eliminar/{id}")
     private ResponseEntity<CategoryResponseRest> Eliminar(@PathVariable Long id)
     {
-        ResponseEntity<CategoryResponseRest> response = categoryServicesIMPL.Eliminar(id);
+        ResponseEntity<CategoryResponseRest> response = categoryServicesIMPL.Delete(id);
         return response;
     }
 

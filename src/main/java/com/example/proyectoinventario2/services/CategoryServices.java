@@ -11,6 +11,8 @@ public interface CategoryServices {
 
     public ResponseEntity<CategoryResponseRest> Agregar(Category category);
 
-    public ResponseEntity<CategoryResponseRest> Eliminar(Long id);
+    public ResponseEntity<CategoryResponseRest> Update(Category category , Long id);
+
+    public ResponseEntity<CategoryResponseRest> Delete(Long id);
 
 }
