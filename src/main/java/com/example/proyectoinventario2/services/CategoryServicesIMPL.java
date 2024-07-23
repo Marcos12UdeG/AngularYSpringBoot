@@ -152,5 +152,22 @@ public class CategoryServicesIMPL implements CategoryServices{
         return new ResponseEntity<CategoryResponseRest>(response,HttpStatus.OK);
     }
 
+    @Override
+    public ResponseEntity<CategoryResponseRest> PorNombre(String description) {
+        CategoryResponseRest response = new CategoryResponseRest();
+        List<Category> list = categoryDAO.seleccionar(description);
+
+        if(list.isEmpty())
+        {
+
+            response.setMetadata("Malo","0","No se encontro");
+            return new ResponseEntity<CategoryResponseRest>(response,HttpStatus.INTERNAL_SERVER_ERROR);
+        }else {
+            response.getCategoryResponse().setCategoryList(list);
+            response.setMetadata("Bueno","1","Se encontro");
+        }
+        return new ResponseEntity<CategoryResponseRest>(response,HttpStatus.OK);
+    }
+
 
 }

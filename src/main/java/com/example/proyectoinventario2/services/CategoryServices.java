@@ -15,4 +15,8 @@ public interface CategoryServices {
 
     public ResponseEntity<CategoryResponseRest> Delete(Long id);
 
+    public ResponseEntity<CategoryResponseRest> PorNombre(String description);
+
+
+
 }

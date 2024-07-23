@@ -51,4 +51,11 @@ public class CategoryController {
         return response;
     }
 
+    @GetMapping("/pornombre/{description}")
+    private ResponseEntity<CategoryResponseRest> porNombre(@PathVariable String description)
+    {
+        ResponseEntity<CategoryResponseRest> response = categoryServicesIMPL.PorNombre(description);
+        return response;
+    }
+
 }
