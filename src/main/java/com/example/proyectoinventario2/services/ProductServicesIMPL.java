@@ -33,16 +33,17 @@ public class ProductServicesIMPL implements ProductServices{
     public ProductDAO productDAO;
 
     @Override
+    @Transactional(readOnly = true)
     public ResponseEntity<ProductResponseRest> AllProducts() {
         ProductResponseRest response = new ProductResponseRest();
-        try{
-            List<Product> lista = (List<Product>)productDAO.findAll();
+        List<Product> lista = (List<Product>) productDAO.findAll();
+
+        if(lista.size() > 0){
             response.getProductResponse().setProductList(lista);
-            response.setMetadata("Ok","00","Exito");
-        }catch(Exception e){
-            e.getStackTrace();
-            response.setMetadata("No Ok","01","No exito");
-            return new ResponseEntity<ProductResponseRest>(response,HttpStatus.INTERNAL_SERVER_ERROR);
+            response.setMetadata("OK","00","Productos encontrados");
+        }else{
+            response.setMetadata("NO OK","-1","Productos no encontrados");
+            return new ResponseEntity<ProductResponseRest>(response,HttpStatus.NO_CONTENT);
         }
         return new ResponseEntity<ProductResponseRest>(response,HttpStatus.OK);
     }
@@ -106,20 +107,14 @@ public class ProductServicesIMPL implements ProductServices{
     @Transactional
     public ResponseEntity<ProductResponseRest> GetByName(String name) {
         ProductResponseRest response = new ProductResponseRest();
-        List<Product> optionalProduct = new ArrayList<>();
+
         List<Product> aux = productDAO.findByNameContainingIgnoreCase(name);
 
 
-        if(aux.size() > 0){
+        if(aux.size() > 0) {
+            response.getProductResponse().setProductList(aux);
+            response.setMetadata("OK", "00", "Productos Encontrados");
 
-            aux.stream().forEach((p) ->{
-                byte [] imageDescompressed = util.decompressZLib(p.getPicture());
-                p.setPicture(imageDescompressed);
-                optionalProduct.add(p);
-            });
-
-            response.getProductResponse().setProductList(optionalProduct);
-            response.setMetadata("OK","00","Bueno");
         }else{
             response.setMetadata("No OK","01","Malo");
             return new ResponseEntity<ProductResponseRest>(response,HttpStatus.NOT_FOUND);
@@ -145,4 +140,48 @@ public class ProductServicesIMPL implements ProductServices{
         }
         return new ResponseEntity<ProductResponseRest>(response,HttpStatus.OK);
     }
+
+    @Override
+    @Transactional
+    public ResponseEntity<ProductResponseRest> UpdateProduct(Product product, Long categoryId,Long id) {
+        ProductResponseRest response = new ProductResponseRest();
+        Optional<Category> category= categoryDao.findById(categoryId);
+        List<Product> lista = new ArrayList<>();
+
+        if(category.isPresent()){
+            product.setCategory(category.get());
+        }else{
+            response.setMetadata("No OK","-1","Producto no Actualizado");
+            return new ResponseEntity<ProductResponseRest>(response,HttpStatus.NO_CONTENT);
+        }
+
+        Optional<Product> productSearch = productDAO.findById(id);
+        if(productSearch.isPresent()){
+
+            productSearch.get().setName(product.getName());
+            productSearch.get().setPrice(product.getPrice());
+            productSearch.get().setAccount(product.getAccount());
+            productSearch.get().setCategory(product.getCategory());
+            productSearch.get().setPicture(product.getPicture());
+
+            Product productSave = productDAO.save(productSearch.get());
+
+            if(productSave != null){
+                lista.add(productSave);
+                response.getProductResponse().setProductList(lista);
+                response.setMetadata("Ok","00","Producto Actualizado");
+            }else{
+                response.setMetadata("No OK","-1","Producto No Actualizado");
+                return new ResponseEntity<ProductResponseRest>(response,HttpStatus.NOT_FOUND);
+            }
+        }else{
+            response.setMetadata("No OK","-1","Producto No Actualizado");
+            return new ResponseEntity<ProductResponseRest>(response,HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+        return new ResponseEntity<ProductResponseRest>(response,HttpStatus.OK);
+
+    }
+
+
 }
