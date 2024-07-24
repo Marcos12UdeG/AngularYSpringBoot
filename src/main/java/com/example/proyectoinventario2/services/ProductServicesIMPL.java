@@ -37,8 +37,13 @@ public class ProductServicesIMPL implements ProductServices{
     public ResponseEntity<ProductResponseRest> AllProducts() {
         ProductResponseRest response = new ProductResponseRest();
         List<Product> lista = (List<Product>) productDAO.findAll();
-
-        if(lista.size() > 0){
+        List<Product> aux = new ArrayList<>();
+         if(lista.size() > 0){
+             lista.stream().forEach((p ->{
+                 byte [] image = util.decompressZLib(p.getPicture());
+                 p.setPicture(image);
+                 aux.add(p);
+             }));
             response.getProductResponse().setProductList(lista);
             response.setMetadata("OK","00","Productos encontrados");
         }else{
