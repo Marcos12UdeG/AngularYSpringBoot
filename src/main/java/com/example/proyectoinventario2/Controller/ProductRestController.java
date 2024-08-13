@@ -3,9 +3,13 @@ package com.example.proyectoinventario2.Controller;
 
 
 import com.example.proyectoinventario2.model.Product;
+import com.example.proyectoinventario2.response.CategoryResponseRest;
 import com.example.proyectoinventario2.response.ProductResponseRest;
 import com.example.proyectoinventario2.services.ProductServicesIMPL;
+import com.example.proyectoinventario2.util.CategoryExcel;
+import com.example.proyectoinventario2.util.ProductExcel;
 import com.example.proyectoinventario2.util.util;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,6 +24,7 @@ public class ProductRestController {
 
     @Autowired
     private ProductServicesIMPL productServicesIMPL;
+    private ProductExcel productExcel;
 
     @GetMapping("/Obtener")
     public ResponseEntity<ProductResponseRest> AllCategories() {
@@ -76,6 +81,21 @@ public class ProductRestController {
         ResponseEntity<ProductResponseRest> response = productServicesIMPL.UpdateProduct(product,categoryId,id);
 
         return response;
+    }
+
+    @GetMapping("/products/export/excel")
+    public void exportExcel(HttpServletResponse response)throws IOException {
+        response.setContentType("application/octet-stream");
+
+        String headerKey = "Content-Disposition";
+        String headerValue = "attachment; filename= result_products.xlsx";
+        response.setHeader(headerKey,headerValue);
+
+        ResponseEntity<ProductResponseRest> response1 = productServicesIMPL.AllProducts();
+
+        productExcel = new ProductExcel(response1.getBody().getProductResponse().getProductList());
+
+        productExcel.exportExcel(response);
     }
 }
 

@@ -12,4 +12,7 @@ public interface ProductDAO extends CrudRepository<Product,Long> {
     List<Product> findByNameLike(String name);
 
     List<Product> findByNameContainingIgnoreCase(String name);
+
+    @Query("Select p from Product p where p.price > 25")
+    List<Product> findByPrice(int price);
 }

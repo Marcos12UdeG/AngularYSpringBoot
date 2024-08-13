@@ -13,7 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
+import java.util.Base64;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -32,26 +32,31 @@ public class ProductServicesIMPL implements ProductServices{
     @Autowired
     public ProductDAO productDAO;
 
+
+// ...
+
     @Override
     @Transactional(readOnly = true)
     public ResponseEntity<ProductResponseRest> AllProducts() {
         ProductResponseRest response = new ProductResponseRest();
         List<Product> lista = (List<Product>) productDAO.findAll();
         List<Product> aux = new ArrayList<>();
-         if(lista.size() > 0){
-             lista.stream().forEach((p ->{
-                 byte [] image = util.decompressZLib(p.getPicture());
-                 p.setPicture(image);
-                 aux.add(p);
-             }));
-            response.getProductResponse().setProductList(lista);
+
+        if(lista.size() > 0){
+            lista.stream().forEach( (p) ->{
+                byte[] picture = util.decompressZLib(p.getPicture());
+                p.setPicture(picture);
+                aux.add(p);
+            });
+            response.getProductResponse().setProductList(aux);
             response.setMetadata("OK","00","Productos encontrados");
-        }else{
+        } else {
             response.setMetadata("NO OK","-1","Productos no encontrados");
-            return new ResponseEntity<ProductResponseRest>(response,HttpStatus.NO_CONTENT);
+            return new ResponseEntity<ProductResponseRest>(response, HttpStatus.NO_CONTENT);
         }
-        return new ResponseEntity<ProductResponseRest>(response,HttpStatus.OK);
+        return new ResponseEntity<ProductResponseRest>(response, HttpStatus.OK);
     }
+
 
     @Override
     public ResponseEntity<ProductResponseRest> SaveProduct(Product product,Long categoryId) {
@@ -109,23 +114,28 @@ public class ProductServicesIMPL implements ProductServices{
     }
 
     @Override
-    @Transactional
     public ResponseEntity<ProductResponseRest> GetByName(String name) {
         ProductResponseRest response = new ProductResponseRest();
-
-        List<Product> aux = productDAO.findByNameContainingIgnoreCase(name);
-
-
-        if(aux.size() > 0) {
-            response.getProductResponse().setProductList(aux);
-            response.setMetadata("OK", "00", "Productos Encontrados");
-
-        }else{
-            response.setMetadata("No OK","01","Malo");
+        List<Product> aux = new ArrayList<>();
+        List<Product> lista = productDAO.findByNameContainingIgnoreCase(name);
+        try{
+            if(lista.size() > 0){
+                lista.stream().forEach( (p) ->{
+                    byte[] image = util.decompressZLib(p.getPicture());
+                    p.setPicture(image);
+                    aux.add(p);
+                });
+                response.getProductResponse().setProductList(aux);
+                response.setMetadata("Bueno","00","Productos encontrados");
+            }
+        }catch(Exception e){
+            e.getStackTrace();
+            response.setMetadata("Malo","-1","Productos no encontrados");
             return new ResponseEntity<ProductResponseRest>(response,HttpStatus.NOT_FOUND);
         }
         return new ResponseEntity<ProductResponseRest>(response,HttpStatus.OK);
     }
+
 
     @Override
     @Transactional
